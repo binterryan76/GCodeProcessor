@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using GCodeProcessor.Helpers;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace GCodeProcessor.ViewModels;
 
@@ -24,6 +25,12 @@ public partial class MainViewModel : ViewModelBase
             return;
         }
 
+        if(!File.Exists(FilePath))
+        {
+            // TODO: add MessageBox.Show;
+            return;
+        }
+
         string[] lines;
 
         try
@@ -38,12 +45,20 @@ public partial class MainViewModel : ViewModelBase
 
         StringBuilder output = GCodeHelpers.GetCommentedFile(lines);
 
-        string fileExtension = FilePath.Split(".").Last();
-        string newFilePath = FilePath.Replace($".{fileExtension}", $" Commented.{fileExtension}");
+        string newFilePath = GetNewFilePath(FilePath);
 
         File.WriteAllText(newFilePath, output.ToString());
 
         Process.Start("notepad.exe", newFilePath);
     }
 
+    /// <summary>
+    /// Appends " Commented" to the given file name.
+    /// </summary>
+    /// <param name="oldFilePath"></param>
+    /// <returns></returns>
+    private static string GetNewFilePath(string oldFilePath)
+    {
+        return oldFilePath.AppendToFileName(" Commented").MakeUnique();
+    }
 }

@@ -3,7 +3,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:GCodeProcessor.ViewModels"
-             xmlns:views="clr-namespace:GCodeProcessor.Views"
              mc:Ignorable="d" d:DesignWidth="550" d:DesignHeight="130"
              x:Class="GCodeProcessor.Views.MainView"
              x:DataType="vm:MainViewModel">

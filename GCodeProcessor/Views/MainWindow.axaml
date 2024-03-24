@@ -11,5 +11,5 @@
         x:Class="GCodeProcessor.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="GCodeProcessor">
-        <views:MainView />
+        <views:MainView Name="MainView"/>
 </Window>

@@ -8,6 +8,8 @@ using System.Text;
 using GCodeProcessor.Helpers;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using GCodeProcessor.Views;
+using System;
 
 namespace GCodeProcessor.ViewModels;
 
@@ -21,13 +23,13 @@ public partial class MainViewModel : ViewModelBase
     {
         if (FilePath.IsNullOrWhitespace())
         {
-            // TODO: add MessageBox.Show("Please select a file first.");
+            ShowMessageBox("Please select a file first.", "Select File");
             return;
         }
 
         if(!File.Exists(FilePath))
         {
-            // TODO: add MessageBox.Show;
+            ShowMessageBox($"Could not find {FilePath}", "File Not Found");
             return;
         }
 
@@ -39,7 +41,7 @@ public partial class MainViewModel : ViewModelBase
         }
         catch
         {
-            // TODO: add MessageBox.Show($"Cannot open and read {textBoxFile.Text}");
+            ShowMessageBox($"Cannot open and read {FilePath}", "File Error");
             return;
         }
 
@@ -61,4 +63,26 @@ public partial class MainViewModel : ViewModelBase
     {
         return oldFilePath.AppendToFileName(" Commented").MakeUnique();
     }
+
+    #region "MessageBox"
+    public event EventHandler<MessageBoxEventArgs> ShowMessageBoxRequested;
+
+    public class MessageBoxEventArgs : EventArgs
+    {
+        public MessageBoxEventArgs(string message, string title)
+        {
+            Message= message;
+            Title = title;
+        }
+
+        public string Message { get; set; }
+        public string Title { get; set; }
+    }
+
+    private void ShowMessageBox(string message, string title)
+    {
+        MessageBoxEventArgs args = new(message, title);
+        ShowMessageBoxRequested?.Invoke(this, args);
+    }
+    #endregion
 }

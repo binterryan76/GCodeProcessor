@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using GCodeProcessor.Views;
 using System;
+using StringHelpers;
 
 namespace GCodeProcessor.ViewModels;
 

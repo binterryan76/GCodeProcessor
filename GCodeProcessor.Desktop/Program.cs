@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Avalonia;
 
 namespace GCodeProcessor.Desktop;

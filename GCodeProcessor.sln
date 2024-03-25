@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GCodeParser", "GCodeParser\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringHelpers", "StringHelpers\StringHelpers.csproj", "{D0DFDD71-CD6D-4BEF-A0D3-C7AC1E7882FB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CachedProperty", "CachedProperty\CachedProperty.csproj", "{0E7699F7-4D50-49BA-82AF-6AD9352BA856}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D0DFDD71-CD6D-4BEF-A0D3-C7AC1E7882FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0DFDD71-CD6D-4BEF-A0D3-C7AC1E7882FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0DFDD71-CD6D-4BEF-A0D3-C7AC1E7882FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E7699F7-4D50-49BA-82AF-6AD9352BA856}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E7699F7-4D50-49BA-82AF-6AD9352BA856}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E7699F7-4D50-49BA-82AF-6AD9352BA856}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E7699F7-4D50-49BA-82AF-6AD9352BA856}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

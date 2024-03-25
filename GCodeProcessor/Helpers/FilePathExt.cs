@@ -21,7 +21,11 @@ namespace GCodeProcessor.Helpers
             if (filePath.IsNullOrWhitespace())
                 return filePath;
 
-            string dir = Path.GetDirectoryName(filePath);
+            string? dir = Path.GetDirectoryName(filePath);
+
+            if (dir == null) 
+                return filePath;
+
             string fileName = Path.GetFileNameWithoutExtension(filePath);
             string fileExt = Path.GetExtension(filePath);
 

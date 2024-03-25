@@ -5,26 +5,43 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using CachedProperty;
 
 namespace GCodeParser;
 
 public class GCodeLine
 {
-    public string Text { get; }
-    private string textWithoutComments;
-    //public List<GCodeCommand> Commands { get; }
-    public List<GCodeWord> Words { get; }
-    public List<string> Comments { get; }
+    /// <summary>
+    /// Warning: setting the text to a new value by causes 
+    /// the entire file to need to be reparsed because the 
+    /// words list and Comments will be wrong and adding a 
+    /// word will cause the latestCommandWord property to 
+    /// need updating.
+    /// </summary>
+    public string Text { get; set;}
 
-    public GCodeLine(string text)
+    private string textWithoutComments;
+    public List<GCodeWord> Words { get; private set; }
+    public List<string> Comments { get; private set; }
+    public CachedProperty<string> Description { get; }
+    private GCodeWord? latestCommandWord;
+
+    public GCodeLine(string text, ref GCodeWord? latestCommandWord)
     {
         Text= text;
+        Description = new CachedProperty<string>("", GetDescription);
+        this.latestCommandWord = latestCommandWord;
+        Parse();
+    }
+
+    private void Parse()
+    {
         textWithoutComments = string.Empty;
         Words = new List<GCodeWord>();
         Comments = new List<string>();
 
         ParseComments();
-        ParseWords();
+        ParseWords(ref latestCommandWord);
     }
 
     /// <summary>
@@ -74,11 +91,64 @@ public class GCodeLine
     /// <summary>
     /// Fills the Words list using textWithoutComments.
     /// </summary>
-    private void ParseWords()
+    private void ParseWords(ref GCodeWord? latestCommandWord)
     {
         string[] words = textWithoutComments.Split(' ');
 
         foreach (string word in words)
-            Words.Add(new GCodeWord(word));
+        {
+            if (word.IsNullOrWhitespace())
+                continue;
+
+            Words.Add(new GCodeWord(word, ref latestCommandWord));
+        }
+    }
+
+    /// <summary>
+    /// Gets a description of an entire line of GCode.
+    /// </summary>
+    /// <returns></returns>
+    private string GetDescription()
+    {
+        StringBuilder description = new();
+        bool first = true;
+
+        foreach(GCodeWord word in Words)
+        {
+            string wordDescription = word.Description.Value;
+
+            // skip words with blank descriptions
+            if (wordDescription.IsNullOrWhitespace())
+                continue;
+
+            if (!first)
+                description.Append(" | ");
+
+            description.Append(wordDescription);
+
+            first = false;
+        }
+
+        return description.ToString();
+    }
+
+    /// <summary>
+    /// Applies a given comment to the end of this line.
+    /// Starts the comment at maxLineLength if provided.
+    /// </summary>
+    /// <param name="comment"></param>
+    /// <param name="maxLineLength"></param>
+    public void AppendComment(string comment, int maxLineLength = 0)
+    {
+        string formattedComment = " ; " + comment;
+        string newLine;
+
+        if (maxLineLength > 0)
+            newLine = Text.PadRight(maxLineLength) + formattedComment;
+        else
+            newLine = Text + formattedComment;
+
+        Text = newLine;
+        Comments.Add(formattedComment);
     }
 }

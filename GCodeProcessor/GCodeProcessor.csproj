@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GCodeParser\GCodeParser.csproj" />
     <ProjectReference Include="..\StringHelpers\StringHelpers.csproj" />
   </ItemGroup>
 </Project>

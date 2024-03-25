@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using GCodeProcessor.Views;
 using System;
 using StringHelpers;
+using GCodeParser;
 
 namespace GCodeProcessor.ViewModels;
 
@@ -28,29 +29,24 @@ public partial class MainViewModel : ViewModelBase
             return;
         }
 
-        if(!File.Exists(FilePath))
+        string newFilePath = GetNewFilePath(FilePath);
+
+        try
+        {
+            GCodeFile file = new(FilePath);
+            file.AppendComments();
+            file.SaveAs(newFilePath);
+        }
+        catch(FileNotFoundException ex)
         {
             ShowMessageBox($"Could not find {FilePath}", "File Not Found");
             return;
         }
-
-        string[] lines;
-
-        try
+        catch (Exception ex)
         {
-            lines = File.ReadAllLines(FilePath);
-        }
-        catch
-        {
-            ShowMessageBox($"Cannot open and read {FilePath}", "File Error");
+            ShowMessageBox($"Could not open {FilePath}", "Error Opening File");
             return;
         }
-
-        StringBuilder output = GCodeHelpers.GetCommentedFile(lines);
-
-        string newFilePath = GetNewFilePath(FilePath);
-
-        File.WriteAllText(newFilePath, output.ToString());
 
         Process.Start("notepad.exe", newFilePath);
     }

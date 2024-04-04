@@ -184,7 +184,7 @@ public class GCodeWord
             case 13: return "Z AXIS RECIPROCATION";
             case 14: return "B AXIS RECIPROCATION";
             case 15: return "A AXIS RECIPROCATION";
-            case 16: return "";
+            case 16: return "SOME KIND OF AXIS RECIPROCATION";
             case 17: return "END OF SUBROUTINE";
             case 18: return "AIR RATCHETING INDEXER";
             case 19: return "SPINDLE STOP AND ORIENT";

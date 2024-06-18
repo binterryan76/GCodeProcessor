@@ -1,24 +1,25 @@
-﻿using StringHelpers;
+﻿using CachedProperty;
+using StringHelpers;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using CachedProperty;
 
 namespace GCodeParser;
 
 public class GCodeLine
 {
     /// <summary>
-    /// Warning: setting the text to a new value by causes 
-    /// the entire file to need to be reparsed because the 
-    /// words list and Comments will be wrong and adding a 
-    /// word will cause the latestCommandWord property to 
+    /// Warning: setting the text to a new value by causes
+    /// the entire file to need to be reparsed because the
+    /// words list and Comments will be wrong and adding a
+    /// word will cause the latestCommandWord property to
     /// need updating.
     /// </summary>
-    public string Text { get; set;}
+    public string Text { get; set; }
 
     private string textWithoutComments;
     public List<GCodeWord> Words { get; private set; }
@@ -28,7 +29,7 @@ public class GCodeLine
 
     public GCodeLine(string text, ref GCodeWord? latestCommandWord)
     {
-        Text= text;
+        Text = text;
         Description = new CachedProperty<string>("", GetDescription);
         this.latestCommandWord = latestCommandWord;
         Parse();
@@ -59,21 +60,21 @@ public class GCodeLine
 
         foreach (char c in Text)
         {
-            if(c == '(')
+            if (c == '(')
                 inComment = true;
 
-            if(c == ';')
+            if (c == ';')
             {
                 inComment = true;
                 everythingElseIsComment = true;
             }
 
-            if(inComment)
+            if (inComment)
                 currentComment.Append(c);
             else
                 textWithoutComments.Append(c);
 
-            if(c == ')' && !everythingElseIsComment)
+            if (c == ')' && !everythingElseIsComment)
             {
                 inComment = false;
                 Comments.Add(currentComment.ToString());
@@ -93,15 +94,71 @@ public class GCodeLine
     /// </summary>
     private void ParseWords(ref GCodeWord? latestCommandWord)
     {
-        string[] words = textWithoutComments.Split(' ');
-
-        foreach (string word in words)
+        foreach (string word in GetWordsFromText())
         {
             if (word.IsNullOrWhitespace())
                 continue;
 
             Words.Add(new GCodeWord(word, ref latestCommandWord));
         }
+    }
+
+    private readonly static string[] MetaCommandChars = new[] { "IF", "GOTO", "=", "#", "[", "]" };
+    public bool HasMetaCommands
+    {
+        get
+        {
+            string textUpper = textWithoutComments.ToUpper();
+            return MetaCommandChars.Any(c => textUpper.Contains(c));
+        }
+    }
+
+    /// <summary>
+    /// Returns a list of gcode words from the gcode text without any comments.
+    /// G1M17M20 G30 => G1, M17, M20, G30
+    /// </summary>
+    /// <param name="textWithoutComments"></param>
+    /// <returns></returns>
+    private List<string> GetWordsFromText()
+    {
+        const char BLOCK_DELETE_CHAR = '/';
+        List<string> words = new();
+        StringBuilder currentWord = new();
+
+        if (textWithoutComments.StartsWith(BLOCK_DELETE_CHAR))
+            return words;
+
+        // check for meta commands
+        if (HasMetaCommands)
+        {
+            // if the line has meta commands then it will just be maybe a line number then the rest will just be treated as a single word
+            // for now just treat the whole thing as one long weird word i guess...
+            words.Add(textWithoutComments);
+            return words;
+        }
+
+        foreach (char c in textWithoutComments)
+        {
+            // new letters or whitespace characters indicate the start of a new word
+            if ((char.IsLetter(c) || char.IsWhiteSpace(c)) && currentWord.Length > 0)
+            {
+                if (currentWord.Length == 1)
+                    Debug.Assert(false);
+
+                words.Add(currentWord.ToString());
+                currentWord.Clear();
+            }
+
+            // add all non-whitespace characters to gcode words
+            if (!char.IsWhiteSpace(c))
+                currentWord.Append(c);
+        }
+
+        // make sure last word in substring is added to the list of words
+        if (currentWord.Length > 0)
+            words.Add(currentWord.ToString());
+
+        return words;
     }
 
     /// <summary>
@@ -113,7 +170,7 @@ public class GCodeLine
         StringBuilder description = new();
         bool first = true;
 
-        foreach(GCodeWord word in Words)
+        foreach (GCodeWord word in Words)
         {
             string wordDescription = word.Description.Value;
 

@@ -156,7 +156,7 @@ public class GCodeWord
             case 92: return "SET TEMPORARY COORDINATE SYSTEM";
             case 93: return "USE INVERSE TIME FEEDRADE";
             case 94: return "USE FEEDRATE PER MINUTE";
-            case 99: return "RETURN TO INITIAL PLANE";
+            case 98: return "RETURN TO INITIAL PLANE";
             default: return $"UNKNOWN G{IntValue} COMMAND";
         }
     }

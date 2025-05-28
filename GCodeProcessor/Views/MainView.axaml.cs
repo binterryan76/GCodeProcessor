@@ -38,6 +38,6 @@ public partial class MainView : UserControl
             return;
 
         IStorageFile firstFile = files[0];
-        TextBoxNCFile.Text = firstFile.Path.AbsolutePath;
+        TextBoxNCFile.Text = firstFile.Path.LocalPath;
     }
 }

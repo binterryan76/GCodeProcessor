@@ -265,6 +265,12 @@ public class GCodeWord
         {
             case 'T': return "SET TOOL";
             case 'S': return "SET SPINDLE RPM";
+            case 'E': return "SET FIXTURE OFFSET";
+            case 'H': return "SET TOOL OFFSET";
+            case 'F': return "SET FEEDRATE";
+            case 'X': return "MOVE X";
+            case 'Y': return "MOVE Y";
+            case 'Z': return "MOVE Z";
             case 'G': return HasInt ? GetGCodeDescription() : "";
             case 'M': return HasInt ? GetMCodeDescription() : "";
             default: return "";

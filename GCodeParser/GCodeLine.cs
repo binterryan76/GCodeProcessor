@@ -197,7 +197,7 @@ public class GCodeLine
     /// <param name="maxLineLength"></param>
     public void AppendComment(string comment, int maxLineLength = 0)
     {
-        string formattedComment = " ; " + comment;
+        string formattedComment = $" ({comment})";
         string newLine;
 
         if (maxLineLength > 0)

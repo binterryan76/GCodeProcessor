@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
@@ -13,7 +14,23 @@ public class GCodeWord
 {
     private string text;
     public char Letter { get; set; }
-    public int IntValue { get; set; }
+
+    private int intValue;
+    public int IntValue
+    {
+        get {  return intValue; }
+        set
+        {
+            intValue = value;
+            if (HasInt)
+            {
+                text = Letter + value.ToString();
+                Description.NeedsUpdate = true;
+            }
+        } 
+    }
+
+    //TODO: add ability to update DoubleValue just like IntValue
     public double DoubleValue { get; set; }
     public bool HasInt { get; set; }
     public bool HasDouble { get; set; }
@@ -57,12 +74,25 @@ public class GCodeWord
     private void ParseText()
     {
         Letter = text[0];
+        Debug.Assert(Char.IsLetter(Letter), "All GCode words must start with a letter");
+
         string numberPart = text.Substring(1);
 
-        HasInt = int.TryParse(numberPart, out int intVal);
+        // If there is a decimal in the word for example Z0. then make sure there is no integer value detected
+        if (numberPart.Contains('.'))
+        {
+            HasInt = false;
+            IntValue = 0;
+        }
+        else
+        {
+            HasInt = int.TryParse(numberPart, out int intVal);
+            IntValue = HasInt ? intVal : 0;
+        }
+
         HasDouble = double.TryParse(numberPart, out double doubleVal);
 
-        IntValue = HasInt ? intVal : 0;
+        
         DoubleValue = HasDouble ? doubleVal : 0;
     }
 

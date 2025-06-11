@@ -21,11 +21,40 @@ public class GCodeLine
     /// </summary>
     public string Text { get; set; }
 
+    //TODO: make Text just do what UpdatedText does?
+    /// <summary>
+    /// This library doesnt really support changing word values because that doesn't cause the Text property to update.
+    /// Using the UpdatedText property will recreate the text from the words and comments and return it.
+    /// </summary>
+    public string UpdatedText 
+    {
+        get 
+        {
+            StringBuilder text = new();
+
+            if (this.Words.Count < 1)
+                text.Append(textWithoutComments);
+
+            foreach (GCodeWord word in this.Words)
+                text.Append(word.Text + ' ');
+
+            foreach(string comment in this.Comments)
+                text.Append(comment);
+
+            return text.ToString().Trim();
+        }
+    }
+
     private string textWithoutComments;
     public List<GCodeWord> Words { get; private set; }
     public List<string> Comments { get; private set; }
     public CachedProperty<string> Description { get; }
+
+    /// <summary>
+    /// This stores the previous command which is needed to determine what this word means.
+    /// </summary>
     private GCodeWord? latestCommandWord;
+    public GCodeWord? LineNumberWord { get; private set; }
 
     public GCodeLine(string text, ref GCodeWord? latestCommandWord)
     {
@@ -49,6 +78,7 @@ public class GCodeLine
     /// Fills the Comments list and sets the textWithoutComments variable so words can be parsed.
     /// Everything after semicolon is a comment.
     /// Everything in parentheses is a comment. I dont think GCode matches opening parentheses to closing parentheses.
+    /// Parentheses and semicolos are included in comment string.
     /// </summary>
     private void ParseComments()
     {
@@ -99,7 +129,11 @@ public class GCodeLine
             if (word.IsNullOrWhitespace())
                 continue;
 
-            Words.Add(new GCodeWord(word, ref latestCommandWord));
+            GCodeWord gCodeWord = new(word, ref latestCommandWord);
+            Words.Add(gCodeWord);
+
+            if(gCodeWord.Letter == 'N')
+                LineNumberWord = gCodeWord;
         }
     }
 
@@ -122,10 +156,15 @@ public class GCodeLine
     private List<string> GetWordsFromText()
     {
         const char BLOCK_DELETE_CHAR = '/';
+
+        /// This character is at the start end end of some programs
+        const char START_END_CHAR = '%';
+
         List<string> words = new();
         StringBuilder currentWord = new();
 
-        if (textWithoutComments.StartsWith(BLOCK_DELETE_CHAR))
+        // return empty list of words if the line starts with these special characters
+        if (textWithoutComments.StartsWith(BLOCK_DELETE_CHAR) || textWithoutComments.StartsWith(START_END_CHAR))
             return words;
 
         // check for meta commands
@@ -207,5 +246,19 @@ public class GCodeLine
 
         Text = newLine;
         Comments.Add(formattedComment);
+    }
+
+    /// <summary>
+    /// Returns the first GCodeWord with the given letter.
+    /// </summary>
+    /// <param name="letter"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public GCodeWord? GetFirstWordWithLetter(char letter)
+    {
+        if (!Char.IsLetter(letter))
+            throw new ArgumentException("letter must be a letter.");
+
+        return Words.FirstOrDefault(word => word.Letter == letter);
     }
 }

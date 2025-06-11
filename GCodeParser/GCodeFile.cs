@@ -1,4 +1,6 @@
 ﻿using StringHelpers;
+using System.Collections.Generic;
+using System;
 using System.Text;
 
 namespace GCodeParser;
@@ -77,5 +79,44 @@ public class GCodeFile
             output.AppendLine(line.Text);
 
         File.WriteAllText(newFilePath, output.ToString());
+    }
+
+    /// <summary>
+    /// Moves the GCodeLine from fromIndex to come before the element at toIndex.
+    /// Note: There is no difference between moving the element at index 1 to come before the element at index 1 or to come before the element at index 2.
+    /// </summary>
+    /// <param name="fromIndex"></param>
+    /// <param name="toIndex"></param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public virtual void ReorderLine(int fromIndex, int toIndex)
+    {
+        if (fromIndex < 0 || fromIndex >= Lines.Count)
+            throw new ArgumentOutOfRangeException(nameof(fromIndex));
+
+        if (toIndex < 0 || toIndex > Lines.Count)
+            throw new ArgumentOutOfRangeException(nameof(toIndex));
+
+        // If fromIndex == toIndex or toIndex is one more than fromIndex, then nothing needs moved
+        if (fromIndex == toIndex || (fromIndex + 1) == toIndex)
+            return;
+
+        GCodeLine item = Lines[fromIndex];
+        Lines.RemoveAt(fromIndex);
+
+        // Adjust toIndex if necessary because removing shifts the elements
+        if (toIndex > fromIndex)
+            toIndex--;
+
+        Lines.Insert(toIndex, item);
+    }
+
+    /// <summary>
+    /// Returns the index of the given GCodeLine.
+    /// </summary>
+    /// <param name="line"></param>
+    /// <returns></returns>
+    public int GetLineIndex(GCodeLine line)
+    {
+        return Lines.IndexOf(line);
     }
 }
